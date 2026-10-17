@@ -1,0 +1,13 @@
+{
+  "name": "callme",
+  "version": "0.0.1",
+  "description": "WebRTC calling app: mobile, web, and server",
+  "private": true,
+  "workspaces": [
+    "./server",
+    "./apps/web"
+  ],
+  "scripts": {
+    "install-all": "npm install --workspaces && cd apps/mobile && flutter pub get"
+  }
+}
