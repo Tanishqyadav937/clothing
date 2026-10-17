@@ -21,7 +21,8 @@
     "zustand": "^4.5.0",
     "react-hook-form": "^7.49.3",
     "react-icons": "^5.0.1",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "date-fns": "^3.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "4.2.1",

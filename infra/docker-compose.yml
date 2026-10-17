@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # Signaling Server
+  signaling-server:
+    build:
+      context: ../server
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
+      TURN_REALM: ${TURN_REALM:-example.com}
+      TURN_SECRET: ${TURN_SECRET:-your-secret-key}
+    env_file: ../server/.env
+    depends_on:
+      - firestore-emulator
+    volumes:
+      - ../server/src:/app/src
+    networks:
+      - callme-network
+
+  # TURN Server
+  coturn:
+    image: coturn/coturn:latest
+    ports:
+      - "3478:3478/udp"
+      - "3478:3478/tcp"
+      - "5349:5349/tcp"
+      - "49152-65535:49152-65535/udp"
+    environment:
+      TURN_REALM: ${TURN_REALM:-example.com}
+      TURN_SECRET: ${TURN_SECRET:-your-secret-key}
+    volumes:
+      - ./coturn/turnserver.conf:/etc/coturn/turnserver.conf:ro
+      - coturn-logs:/var/log/coturn
+    networks:
+      - callme-network
+    restart: unless-stopped
+
+  # Firestore Emulator (for local development)
+  firestore-emulator:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+    command: gcloud emulators firestore start --host-port=0.0.0.0:8080
+    ports:
+      - "8080:8080"
+    environment:
+      FIRESTORE_EMULATOR_HOST: 0.0.0.0:8080
+    networks:
+      - callme-network
+
+volumes:
+  coturn-logs:
+
+networks:
+  callme-network:
+    driver: bridge
+
+# Environment variables (.env file example):
+# FIREBASE_PROJECT_ID=your-project-id
+# FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+# FIREBASE_CLIENT_EMAIL=firebase-adminsdk@your-project.iam.gserviceaccount.com
+# TURN_REALM=example.com
+# TURN_SECRET=your-secret-key-32-chars-or-more
