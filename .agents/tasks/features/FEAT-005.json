@@ -1,0 +1,40 @@
+{
+  "id": "FEAT-005",
+  "type": "docs",
+  "description": "Configure coturn TURN relay server, write deployment and API documentation, and create deployment scripts. Includes turnserver.conf config with realm, secret, listening ports, relay port range, and bandwidth limits. Documents deployment to small VPS (AWS t2.micro, DigitalOcean, Render), environment setup, and monitoring.",
+  "status": "pending",
+  "steps": [
+    "Create /infra/coturn/turnserver.conf: Enable UDP/TCP listeners on 3478 and 5349, set realm and secret from environment, allocate relay port range (49152-65535), enable fingerprinting, set per-user bandwidth limit (1 Mbps per spec §1.10 mitigation), disable file-based auth (use dynamic credentials), enable TLS for secure connections",
+    "Create /infra/coturn/install-coturn.sh: Bash script to install coturn on Ubuntu/Debian, copy config, enable systemd service, open firewall ports (UFW rules for 3478/UDP, 3478/TCP, 5349/TCP, relay port range)",
+    "Create /infra/coturn/monitoring.sh: Script to check coturn service status, monitor UDP/TCP port listeners, log connection stats, restart on failure",
+    "Create /docs/DEPLOYMENT.md: Step-by-step guide to deploy entire stack; includes: 1) Node.js signaling server setup (Node 16+, npm install, systemd service), 2) coturn setup via install-coturn.sh, 3) Firebase project setup (enable Firestore, Auth, Messaging), 4) Flutter app build (flutter build apk, flutter build ios scaffold), 5) React web build and static hosting (npm run build, deploy dist/ to Netlify/Vercel/S3), 6) environment variables setup on each host (.env files from .env.example), 7) health checks (curl endpoints, socket connection test)",
+    "Create /docs/API.md: Complete REST API reference; include: 1) Authentication (Bearer token header, Firebase ID token required), 2) Users endpoints (POST /api/users/username, GET /api/users/search?username=), 3) Contacts endpoints (GET /api/contacts, POST /api/contacts/request, POST /api/contacts/respond, POST /api/contacts/block), 4) Calls endpoints (GET /api/calls/history?limit=&offset=), 5) TURN credentials endpoint (GET /api/turn-credentials), 6) Request/response examples, 7) Error codes and meanings",
+    "Create /docs/SIGNALING.md: Socket.io event reference; include: 1) Client-to-server events (auth, call:request, call:accept, call:reject, call:end, webrtc:offer, webrtc:answer, webrtc:ice), 2) Server-to-client events (auth:ok, auth:error, call:incoming, call:accepted, call:rejected, call:ended, call:unavailable, webrtc:offer, webrtc:answer, webrtc:ice, presence:update), 3) Payload schemas, 4) Event flow diagram (sequence chart), 5) Timing requirements and timeouts",
+    "Create /docs/TURN.md: TURN server guide; include: 1) How TURN works (relay fallback), 2) coturn configuration options explained, 3) Credential generation and validation (time-limited passwords), 4) Bandwidth monitoring and limits, 5) Port allocation strategy (ephemeral port range), 6) Testing TURN connectivity (stunclient tool, manual test steps)",
+    "Create /docs/ARCHITECTURE.md: System overview; include: 1) Component diagram, 2) Data flow (signup → login → contacts → call setup → negotiation → media flow), 3) Security model (token validation, DTLS-SRTP, rate limiting), 4) Scaling considerations (Redis adapter for multiple signaling instances, regional TURN servers), 5) Monitoring points (connection success rate, call setup latency, TURN relay usage, error rates)",
+    "Create /docs/TROUBLESHOOTING.md: Common issues and fixes; include: 1) Call fails to connect (check TURN reachability, NAT type), 2) Audio not working (check microphone permissions, media track initialization), 3) Incoming calls not received (check FCM setup, background service, APNs scaffold), 4) Server crashes (check logs, rate limit tuning), 5) High bandwidth usage (monitor per-user limits, check for stuck connections)",
+    "Create /docs/SECURITY.md: Security considerations; include: 1) Authentication (Firebase ID tokens, token expiry), 2) Authorization (contacts-only calling enforced server-side), 3) Transport security (HTTPS/WSS, DTLS-SRTP), 4) Data privacy (email not exposed, minimal PII collected), 5) Abuse prevention (rate limiting, contact approval, block list), 6) Recommended security headers (CORS, CSP, HSTS)"
+  ],
+  "acceptance_criteria": [
+    "turnserver.conf is valid and includes: realm, secret from environment, listeners on 3478/UDP and 5349/TCP, relay port range (49152-65535), bandwidth limits, fingerprinting enabled",
+    "/docs/DEPLOYMENT.md covers all components (signaling server, coturn, Firebase, mobile builds, web deployment) with exact commands and expected outputs",
+    "/docs/API.md includes all REST endpoints with request/response examples and error codes; matches server implementation",
+    "/docs/SIGNALING.md includes all Socket.io events with payload schemas and sequence diagram; matches server implementation",
+    "install-coturn.sh is executable and installs coturn, copies config, sets up systemd service on Ubuntu/Debian",
+    "monitoring.sh checks coturn status and logs connection stats without errors",
+    "/docs/TURN.md explains credential generation, port allocation, bandwidth limits, and includes stunclient test commands",
+    "All docs are accurate reflections of the implementation (FEAT-002, FEAT-003, FEAT-004); no conflicts or outdated information"
+  ],
+  "verification": [
+    "Run: cat /infra/coturn/turnserver.conf — verify valid syntax (no errors when parsed by turnserver)",
+    "Run: bash /infra/coturn/install-coturn.sh (on test Ubuntu/Debian VM) — expect coturn installed, config copied, service enabled",
+    "Run: systemctl status coturn (on VM with coturn installed) — expect 'active (running)'",
+    "Run: bash /infra/coturn/monitoring.sh — expect status output without errors",
+    "Manual check: /docs/API.md endpoint list matches server routes (grep POST /api in /server/src/routes/*.js)",
+    "Manual check: /docs/SIGNALING.md event names match server socket event handlers (grep socket.on in /server/src/services/signaling.js)",
+    "Manual check: /docs/DEPLOYMENT.md step-by-step follows from .env.example and package.json scripts",
+    "Verify: TURN connectivity test — on machine with coturn running, execute stunclient test from remote IP, expect successful TURN binding"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

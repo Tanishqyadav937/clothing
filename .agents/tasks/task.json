@@ -1,0 +1,7 @@
+{
+  "task_id": "task-callme-webrtc-mvp",
+  "task_description": "Build CallMe WebRTC calling app MVP: monorepo with Node.js signaling server (Express + Socket.io), Flutter mobile app, React web app, self-hosted coturn TURN server, and complete documentation. Features: Firebase Auth, voice-only calls over WebRTC, contacts management, call history, push notifications (FCM/APNs scaffold), offline handling, network resilience.",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004", "FEAT-005"],
+  "blocked_reason": null
+}

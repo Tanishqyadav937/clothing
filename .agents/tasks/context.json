@@ -1,0 +1,26 @@
+{
+  "project_type": "Full-stack WebRTC calling app: Node.js + Express + Socket.io backend + Flutter mobile + React web frontend",
+  "language": "JavaScript (Node.js backend), Dart (Flutter), TypeScript/JSX (React)",
+  "build_system": "npm (Node.js server) + flutter build (Flutter) + Vite (React web)",
+  "test_framework": "Jest (Node.js), flutter test, Vitest (React)",
+  "build_command": "cd server && npm run build; cd ../apps/web && npm run build; cd ../mobile && flutter build apk",
+  "test_command": "cd server && npm test; cd ../apps/web && npm run test",
+  "verification_instructions": "Per MVP design §3.9: unit tests for auth/validation, integration test for 1-to-1 call flow, network tests (WiFi to WiFi), background incoming call test on Android/iOS, load test with 100+ concurrent sockets",
+  "snapshot_or_generated_files": "Flutter build artifacts (APK, AAB); React Vite build output (dist/); server compiled JS if using TypeScript; TURN credentials are generated dynamically per call",
+  "environment_constraints": "Firebase credentials must be in .env files (never committed); coturn server requires public IP with UDP/TCP 3478 and 5349 open; iOS APNs needs Apple Developer account (out of scope for MVP, scaffold only); Flutter hot reload requires iOS 13+ / Android 8+",
+  "contribution_requirements": "Mobile-first MVP (Flutter priority) per spec §1.3 and user request; voice-only for MVP (video in Phase 2 per §1.4); self-hosted coturn config only (no provisioning automation); custom Socket.io signaling (not managed service); contacts require explicit acceptance before calling (§3.2 'pending' status); exact npm/flutter commands in plan",
+  "key_patterns": "WebRTC signaling via Socket.io events (§3.3); Firebase UID as primary key; call state machine (missed/rejected/completed/failed); ICE candidate gathering and exchange; DTLS-SRTP media encryption implicit in WebRTC; TURN credential issue on-demand via REST API",
+  "relevant_files": [
+    "webrtc-calling-app-project.md (specification)",
+    "server/src/index.js (Express + Socket.io bootstrap)",
+    "server/src/services/signaling.js (call routing, SDP/ICE relay)",
+    "server/src/services/turn.js (time-limited credential generation)",
+    "server/src/services/push.js (FCM/APNs integration)",
+    "server/src/middleware/auth.js (Firebase token verification)",
+    "apps/mobile/lib/screens/ (Flutter UI screens)",
+    "apps/mobile/lib/services/webrtc_service.dart (peer connection, media track)",
+    "apps/web/src/services/webrtc.js (browser WebRTC implementation)",
+    "infra/coturn/turnserver.conf (TURN relay config)"
+  ],
+  "directory_structure": "Monorepo root contains /server (Node.js backend), /apps/mobile (Flutter), /apps/web (React Vite), /infra (coturn config and deployment scripts), /docs (API and deployment docs). Each package has own package.json, pubspec.yaml, or build config. Root .env stores shared secrets (Firebase, TURN master credentials)."
+}
